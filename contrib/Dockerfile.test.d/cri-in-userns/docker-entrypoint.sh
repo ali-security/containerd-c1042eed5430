@@ -56,7 +56,8 @@ echo >&2 "Waiting for containerd"
 until ctr plugins list; do sleep 3; done
 
 if [ ! -z "$IS_SYSTEMD_CGROUP" ] && [ "$IS_SYSTEMD_CGROUP" = true ];then
-  critest "--ginkgo.skip=should prefer new apparmor field|should support apparmor field|should support deprecated apparmor_profile field|should support unsafe sysctls|should support safe sysctls|should allow privilege escalation when false"
+  # Skip "should terminate with exitCode 137 and reason OOMKilled": flaky in rootless systemd-cgroup userns, exit 137 is seen but the reason is intermittently reported as "Error".
+  critest "--ginkgo.skip=should prefer new apparmor field|should support apparmor field|should support deprecated apparmor_profile field|should support unsafe sysctls|should support safe sysctls|should allow privilege escalation when false|should terminate with exitCode 137 and reason OOMKilled"
   /bin/bash /critest.sh exit
 else
   exec "$@"

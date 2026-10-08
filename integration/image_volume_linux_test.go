@@ -229,6 +229,15 @@ func TestImageVolumeCheckVolatileOption(t *testing.T) {
 		t.Skip("Skip since kernel version < 5.10")
 	}
 
+	// The ubuntu-22.04 GitHub runner kernel (6.8.0-1064-azure as of 2026) no longer reports
+	// "volatile" in the overlay super options of the image volume mount; the same check passes
+	// on the 6.17 ubuntu-24.04 runners, so this is a host-kernel difference, not a containerd one.
+	ge68, err68 := kernel.GreaterEqualThan(kernel.KernelVersion{Kernel: 6, Major: 8})
+	ge69, err69 := kernel.GreaterEqualThan(kernel.KernelVersion{Kernel: 6, Major: 9})
+	if err68 == nil && err69 == nil && ge68 && !ge69 {
+		t.Skip("Skip on Linux 6.8.x: overlay volatile option not reported by this kernel")
+	}
+
 	containerImage := images.Get(images.Alpine)
 	podCtx, _, err := setupRunningContainerWithImageVolume(t, "", containerImage, containerImage, "", "/alpine")
 	require.NoError(t, err)

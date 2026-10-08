@@ -23,7 +23,13 @@ df_line=$(df -T / | grep '^/dev/')
 if [[ "$df_line" =~ ^/dev/([a-z]+)([0-9+]) ]]; then
     dev="${BASH_REMATCH[1]}"
     part="${BASH_REMATCH[2]}"
-    growpart "/dev/$dev" "$part"
+    # growpart exits 1 (NOCHANGE) when the box's partition already fills the disk, as current
+    # almalinux/8 and almalinux/9 boxes do; only a real error (exit >= 2) is fatal.
+    rc=0
+    growpart "/dev/$dev" "$part" || rc=$?
+    if [[ "$rc" -gt 1 ]]; then
+        exit "$rc"
+    fi
 
     fstype=$(echo "$df_line" | awk '{print $2}')
     if [[ "$fstype" = 'btrfs' ]]; then

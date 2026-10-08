@@ -1,6 +1,7 @@
 name: E2E
 on:
   workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,6 +38,10 @@ jobs:
 
       - name: Build and Install containerd
         working-directory: ./src/github.com/containerd/containerd
+        env:
+          # The ali-security fork carries no v2.2.1 tag, so the Makefile's `git describe` yields a bare
+          # commit hash that kubelet's ImageVolume e2e cannot parse as a CRI runtime version.
+          VERSION: v2.2.1
         run: |
           set -e -x
           script/setup/install-seccomp

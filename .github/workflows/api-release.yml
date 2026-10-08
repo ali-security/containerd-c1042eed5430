@@ -1,7 +1,5 @@
 on:
-  push:
-    tags:
-      - "api/v*" # Push events to matching api/v*, i.e. api/v1.0, api/v20.15.10
+  workflow_dispatch:
 
 name: API Release
 
